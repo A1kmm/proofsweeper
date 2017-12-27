@@ -1,0 +1,9 @@
+game-play/ProofSweeperKnown.idr
+game-play/ProofSweeperPlay.idr
+game-play/*.ibc
+game-play/CheckMove.idr
+game-play/game.data
+*~
+game-engine/.stack-work
+game-engine/dist
+

@@ -1,0 +1,25 @@
+name: proof-sweeper-game-engine
+version: 0.0.0.1
+synopsis: A MineSweeper game where you formally prove moves in Idris
+cabal-version:       >=1.10
+build-type: Simple
+
+executable GameEngine
+  hs-source-dirs: src
+  build-depends:
+                base >= 4.7 && < 5
+              , parsec
+              , containers
+              , MonadRandom
+              , deepseq
+              , process
+  main-is: GameEngine.hs
+  other-modules:   GameModel
+                 , GameUtils
+                 , GameIO
+                 , GameDisplay
+                 , IdrisGen
+                 , GameMove
+                 , GameCreation
+  default-language:    Haskell2010
+  ghc-options:       -Wall -Werror
