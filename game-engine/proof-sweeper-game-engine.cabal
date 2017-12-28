@@ -13,6 +13,7 @@ executable GameEngine
               , MonadRandom
               , deepseq
               , process
+              , bytestring
   main-is: GameEngine.hs
   other-modules:   GameModel
                  , GameUtils
