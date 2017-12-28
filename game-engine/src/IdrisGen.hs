@@ -9,7 +9,7 @@ isKnown _ = False
 
 genMineFact :: M.Map Coord Int -> (Coord, CellStatus) -> String
 genMineFact _ (Coord x y, CellStatus _ CellMine) =
-  "  MineAt" ++ (show x) ++ "_" ++ (show y) ++ " : MineFact (Coord " ++ (show x) ++ " " ++ (show y) ++ ") IsMine\n"
+  "  MineAt" ++ (show x) ++ "_" ++ (show y) ++ " : MineFact (MkCoord " ++ (show x) ++ " " ++ (show y) ++ ") IsMine\n"
 genMineFact counts (c@(Coord x y), CellStatus _ CellNotMine) =
   "  NoMineAt" ++ (show x) ++ "_" ++ (show y) ++ " : MineFact (MkCoord " ++ (show x) ++ " " ++ (show y) ++ ") (KnownNotMine " ++ (show $ fromMaybe 0 $ M.lookup c counts) ++ ")\n"
 
