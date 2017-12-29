@@ -4,7 +4,7 @@ synopsis: A MineSweeper game where you formally prove moves in Idris
 cabal-version:       >=1.10
 build-type: Simple
 
-executable GameEngine
+executable ProofSweeperEngine
   hs-source-dirs: src
   build-depends:
                 base >= 4.7 && < 5

@@ -10,7 +10,7 @@ import qualified Data.Map as M
 
 showUsage :: IO ()
 showUsage = putStrLn "\
-  \Usage: GameEngine <subCommand>\n\
+  \Usage: ProofSweeperEngine <subCommand>\n\
   \  Sub-commands:\n\
   \    new <n>       Create a new n*n game, replacing current game\n\
   \    print         Print current status of game\n\
