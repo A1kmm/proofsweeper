@@ -62,9 +62,9 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \    -> (prfKnownNonMinesAreNeighbours : (cNeigh : Coord)\n\
   \           -> elem cNeigh knownNonMines = True\n\
   \           -> elem cNeigh (mineNeighboursForSize c) = True)\n\
-  \    -> (prfNonMineIsNeighbour : elem cNonMine (mineNeighboursForSize c) = True)\n\
+  \    -> (prfNonMineIsNeighbour : elem cMine (mineNeighboursForSize c) = True)\n\
   \    -> (prfMineNotInKnownNonMines : elem cMine knownNonMines = False)\n\
-  \    -> MineFact cNonMine IsMine\n"
+  \    -> MineFact cMine IsMine\n"
     ++ genMineFacts counts status ++ "\n"
     ++ "\
   \-- TODO: See if we can prove this instead of asserting...\n\
