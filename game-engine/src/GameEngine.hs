@@ -25,6 +25,12 @@ doPrintCommand = do
   Just game <- loadGame
   let counts = gameToMineCounts game
   putStrLn $ displayGame game counts
+  
+doRegenCommand :: IO ()
+doRegenCommand = do
+  Just game <- loadGame
+  let counts = gameToMineCounts game
+  saveIdrisGame game counts
 
 doHintCommand :: String -> String -> IO ()
 doHintCommand xStr yStr = do
@@ -51,6 +57,7 @@ main = do
   case args of
     "new":nStr:_-> doNewCommand nStr
     "print":_ -> doPrintCommand
+    "regen":_ -> doRegenCommand -- For development.
     "hint":x:y:_ -> doHintCommand x y
     "move":moveType:x:y:_ -> doMoveCommand moveType x y
     _ -> showUsage

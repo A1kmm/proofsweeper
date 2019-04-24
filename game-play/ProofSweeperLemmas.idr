@@ -1,6 +1,7 @@
 module ProofSweeperLemmas
 
 import ProofSweeperBase
+import ProofSweeperKnown
 
 %default total
 %access public export
@@ -216,3 +217,12 @@ trueForAllListElems8 p prfEq el1 el2 el3 el4 el5 el6 el7 el8 fact1 fact2 fact3 f
                                 False) = True} prfEqFalse prfElem
       )
     )
+
+
+notNonMineImpliesMine : Not (MineFact c IsNotMine) -> MineFact c IsMine
+notNonMineImpliesMine {c} prfNotNonMine = case mineOrNot c of
+  Left prfCIsMine => prfCIsMine
+  Right prfNonMine => absurd (prfNotNonMine prfNonMine)
+
+mineImpliesNotNonMine : MineFact c IsMine -> Not (MineFact c IsNotMine)
+mineImpliesNotNonMine {c} prfMine prfNonMine = nonMineImpliesNotMine prfNonMine prfMine

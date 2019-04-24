@@ -65,17 +65,16 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \    -> (prfNonMineIsNeighbour : elem cMine (mineNeighboursForSize c) = True)\n\
   \    -> (prfMineNotInKnownNonMines : elem cMine knownNonMines = False)\n\
   \    -> MineFact cMine IsMine\n"
-    ++ genMineFacts counts status ++ "\n"
-    ++ "\
-  \-- TODO: See if we can prove this instead of asserting...\n\
-  \notNonMineImpliesMine : Not (MineFact c IsNotMine) -> MineFact c IsMine\n\
-  \notNonMineImpliesMine v = believe_me v\n\
+    ++ genMineFacts counts status ++ "\n\
+  \\n\
   \notMineImpliesNonMine : Not (MineFact c IsMine) -> MineFact c IsNotMine\n\
   \notMineImpliesNonMine v = believe_me v\n\
   \nonMineImpliesNotMine : MineFact c IsNotMine -> Not (MineFact c IsMine)\n\
   \nonMineImpliesNotMine v = believe_me v\n\
-  \mineImpliesNotNonMine : MineFact c IsMine -> Not (MineFact c IsNotMine)\n\
-  \mineImpliesNotNonMine v = believe_me v\n"
+  \mineOrNot :\n\
+  \       (c : Coord)\n\
+  \    -> Either (MineFact c IsMine) (MineFact c IsNotMine)\n\
+  \mineOrNot v = believe_me v\n"
   
 saveIdrisGame :: Game -> M.Map Coord Int -> IO ()
 saveIdrisGame g facts = do
