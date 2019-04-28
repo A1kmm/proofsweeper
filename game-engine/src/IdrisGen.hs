@@ -64,11 +64,12 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \           -> elem cNeigh (mineNeighboursForSize c) = True)\n\
   \    -> (prfNonMineIsNeighbour : elem cMine (mineNeighboursForSize c) = True)\n\
   \    -> (prfMineNotInKnownNonMines : elem cMine knownNonMines = False)\n\
-  \    -> MineFact cMine IsMine\n"
+  \    -> MineFact cMine IsMine\n\
+  \  NotMineImpliesNonMine :\n\
+  \       Not (MineFact c IsMine)\n\
+  \    -> MineFact c IsNotMine\n"
     ++ genMineFacts counts status ++ "\n\
   \\n\
-  \notMineImpliesNonMine : Not (MineFact c IsMine) -> MineFact c IsNotMine\n\
-  \notMineImpliesNonMine v = believe_me v\n\
   \nonMineImpliesNotMine : MineFact c IsNotMine -> Not (MineFact c IsMine)\n\
   \nonMineImpliesNotMine v = believe_me v\n\
   \mineOrNot :\n\
