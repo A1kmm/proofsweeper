@@ -3,8 +3,6 @@ import ProofSweeperKnown
 import ProofSweeperBase
 import ProofSweeperLemmas
 
-%access public export
-
 mineAt_14_9 : MineFact (MkCoord 14 9) IsMine
 mineAt_14_9 =
   AllNonMinesAccountedFor 
