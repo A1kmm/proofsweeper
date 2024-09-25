@@ -80,7 +80,7 @@ TwoAboveZCoord = MkCoord 14 11
 contradictionXMine : MineFact XCoord IsMine -> Void
 contradictionXMine hXMine =
   let
-    yIsNotMine : MineFact YCoord IsNotMine :=
+    yIsNotMine : MineFact YCoord IsNotMine =
       AllMinesAccountedFor
         AboveYCoord YCoord NoMineAt13_12 [XCoord] Refl
         -- We need to show that XCoord is a mine...
@@ -93,7 +93,7 @@ contradictionXMine hXMine =
         Refl
         -- And that YCoord is not in [XCoord]
         Refl
-    zIsNotMine : MineFact ZCoord IsNotMine :=
+    zIsNotMine : MineFact ZCoord IsNotMine =
       AllMinesAccountedFor
         AboveYCoord ZCoord NoMineAt13_12 [XCoord] Refl
         -- We need to show that XCoord is a mine...
@@ -107,7 +107,7 @@ contradictionXMine hXMine =
         -- And that ZCoord is not in [XCoord]
         Refl
     -- Now we construct a contradictory fact resulting from yIsNotMine...
-    zIsMine : MineFact ZCoord IsMine :=
+    zIsMine : MineFact ZCoord IsMine =
       AllNonMinesAccountedFor
         AboveZCoord ZCoord NoMineAt14_12
         [TwoAboveYCoord, TwoAboveZCoord, AboveYCoord, YCoord] Refl
