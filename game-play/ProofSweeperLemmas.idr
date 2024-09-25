@@ -2,10 +2,7 @@ module ProofSweeperLemmas
 
 import ProofSweeperBase
 import ProofSweeperKnown
-import Data.Bool
 import Data.Nat
-import Data.List.Elem
-import Decidable.Equality
 
 %default total
 
