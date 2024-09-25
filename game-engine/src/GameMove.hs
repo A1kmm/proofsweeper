@@ -86,7 +86,7 @@ processMove c@(Coord x y) varPrefix expectedType = do
                  \  checkMove = " ++ varPrefix ++ "_" ++ (show x) ++ "_"
                       ++ (show y) ++ "\n"
   writeFile "CheckMove.idr" factCheck
-  (Just hIn, Just hOut, _, procHandle) <- createProcess (proc "idris" ["--ide-mode"]) {
+  (Just hIn, Just hOut, _, procHandle) <- createProcess (proc "idris2" ["--ide-mode"]) {
       std_in = CreatePipe
     , std_out = CreatePipe
   }
