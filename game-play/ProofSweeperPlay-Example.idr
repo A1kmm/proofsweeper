@@ -24,10 +24,10 @@ mineAt_14_9 =
     -- not actually mines...
     (trueForAllListElems eqTestIsEqCoord
       [
-        (MkCoord 13 9 ** knownNotMineIsNotMine NoMineAt13_9),
-        (MkCoord 13 10 ** knownNotMineIsNotMine NoMineAt13_10),
-        (MkCoord 13 11 ** knownNotMineIsNotMine NoMineAt13_11),
-        (MkCoord 14 11 ** knownNotMineIsNotMine NoMineAt14_11)
+        (MkCoord 13 9 ** KnownNotMineIsNotMine NoMineAt13_9),
+        (MkCoord 13 10 ** KnownNotMineIsNotMine NoMineAt13_10),
+        (MkCoord 13 11 ** KnownNotMineIsNotMine NoMineAt13_11),
+        (MkCoord 14 11 ** KnownNotMineIsNotMine NoMineAt14_11)
       ]
     )
     -- prfKnownNonMinesAreNeighbours - We need to break out into individual
@@ -113,9 +113,9 @@ contradictionXMine hXMine =
         [TwoAboveYCoord, TwoAboveZCoord, AboveYCoord, YCoord] Refl
         -- Each of the surrounding Coords are not mines...
         (trueForAllListElems eqTestIsEqCoord
-          [ (TwoAboveYCoord ** knownNotMineIsNotMine NoMineAt13_11),
-            (TwoAboveZCoord ** knownNotMineIsNotMine NoMineAt14_11),
-            (AboveYCoord ** knownNotMineIsNotMine NoMineAt13_12),
+          [ (TwoAboveYCoord ** KnownNotMineIsNotMine NoMineAt13_11),
+            (TwoAboveZCoord ** KnownNotMineIsNotMine NoMineAt14_11),
+            (AboveYCoord ** KnownNotMineIsNotMine NoMineAt13_12),
             (YCoord ** yIsNotMine)])
         -- Surrounding Coords are neighbours of aboveZCoord
         (trueForAllListElems eqTestIsEqCoord

@@ -36,6 +36,7 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \\n\
   \public export\n\
   \data MineFact : Coord -> MineProp -> Type where\n\
+  \  KnownNotMineIsNotMine : MineFact c (KnownNotMine _) -> MineFact c IsNotMine\n\
   \  AllMinesAccountedFor :\n\
   \       (c : Coord)\n\
   \    -> (cNonMine : Coord)\n\
@@ -67,10 +68,6 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \    -> (prfMineNotInKnownNonMines : elem cMine knownNonMines = False)\n\
   \    -> MineFact cMine IsMine\n"
     ++ genMineFacts counts status ++ "\n\
-  \\n\
-  \public export\n\
-  \knownNotMineIsNotMine : MineFact c (KnownNotMine _) -> MineFact c IsNotMine\n\
-  \knownNotMineIsNotMine v = believe_me v\n\
   \\n\
   \public export\n\
   \nonMineImpliesNotMine : MineFact c IsNotMine -> Not (MineFact c IsMine)\n\
