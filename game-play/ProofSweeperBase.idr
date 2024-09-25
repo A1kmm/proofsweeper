@@ -3,25 +3,31 @@
 
 module ProofSweeperBase
 
-%access public export
+import Data.List
+
 %default total
 
+public export
 data Coord = MkCoord Nat Nat
 
+public export
 implementation Eq Coord where
   (MkCoord x1 y1) == (MkCoord x2 y2) = x1 == x2 && y1 == y2
 
+public export
 data MineProp : Type where
   IsMine : MineProp
   IsNotMine : MineProp
   KnownNotMine : Nat -> MineProp
 
+public export
 neighbouringOrdinates : Nat -> Nat -> List Nat
 neighbouringOrdinates _ Z = 0 :: 1 :: Nil
 neighbouringOrdinates gridSize (S n) with (n + 2 >= gridSize)
   neighbouringOrdinates _ (S n) | True  = n :: (S n) :: Nil
   neighbouringOrdinates _ (S n) | False  = n :: (S n) :: S (S n) :: Nil
   
+public export
 allPairs : (a -> b -> c) -> List a -> List b -> List c
 allPairs _ [] y = []
 allPairs f (h::t) y = zipWith f (replicate (length y) h) y ++ allPairs f t y
@@ -29,9 +35,11 @@ allPairs f (h::t) y = zipWith f (replicate (length y) h) y ++ allPairs f t y
 private allPairs_test1 : (allPairs (\x, y => (x, y)) [1,2] [3,4]) = [(1,3),(1,4),(2,3),(2,4)]
 allPairs_test1 = Refl
 
+public export
 mineNeighbours : Nat -> Coord -> List Coord
 mineNeighbours gridSize c@(MkCoord x y) = filter (\x => x /= c) $ allPairs MkCoord (neighbouringOrdinates gridSize x) (neighbouringOrdinates gridSize y)
 
+public export
 distinctCount : Eq x => List x -> Nat
 distinctCount l = length (nub l)
 

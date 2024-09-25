@@ -2,15 +2,17 @@ module ProofSweeperLemmas
 
 import ProofSweeperBase
 import ProofSweeperKnown
+import Data.Nat
 
 %default total
-%access public export
 
 -- Some lemmas about Nat to support reasoning about Coord
+public export
 natSAEqSBTrueImpliesAEqBTrue : (a : Nat) -> (b : Nat) ->
                             (S a == S b = True) -> a == b = True
 natSAEqSBTrueImpliesAEqBTrue a b prf = prf
 
+public export
 natAEqBTrueImpliesEq : (a : Nat) -> (b : Nat) -> (a == b = True) -> a = b
 natAEqBTrueImpliesEq Z Z _ = Refl
 natAEqBTrueImpliesEq Z (S x) prf = absurd prf
@@ -19,17 +21,20 @@ natAEqBTrueImpliesEq (S x) (S y) prf =
   eqSucc x y (natAEqBTrueImpliesEq x y (natSAEqSBTrueImpliesAEqBTrue x y prf))
 
 -- Some lemmas about Bool to support reasoning about Coord
+public export
 aAndBTrueImpliesATrue : (a : Bool) -> (b : Bool) -> (a && b = True) -> a = True
 aAndBTrueImpliesATrue True True prf = prf
 aAndBTrueImpliesATrue True False prf = absurd prf
 aAndBTrueImpliesATrue False _ prf = absurd prf
 
+public export
 aAndBTrueImpliesBTrue : (a : Bool) -> (b : Bool) -> (a && b = True) -> b = True
 aAndBTrueImpliesBTrue True True prf = prf
 aAndBTrueImpliesBTrue True False prf = absurd prf
 aAndBTrueImpliesBTrue False _ prf = absurd prf
 
 -- If two Coords test equal, they are equal
+public export
 eqTestIsEqCoord : (v1 : Coord) -> (v2 : Coord) -> (v1 == v2 = True) -> v1 = v2
 eqTestIsEqCoord (MkCoord v1x v1y) (MkCoord v2x v2y) prf =
     rewrite v1y_is_v2y in (rewrite v1x_is_v2x in Refl)
@@ -40,189 +45,55 @@ eqTestIsEqCoord (MkCoord v1x v1y) (MkCoord v2x v2y) prf =
     v1y_is_v2y = natAEqBTrueImpliesEq _ _ $ aAndBTrueImpliesBTrue _ _ prf
 
 -- If, with a proof you took the branch you did...
+public export
 ifWithProof : (x : Bool) -> (x = True -> a) -> (x = False -> a) -> a
 ifWithProof True ifTrue _ = ifTrue Refl
 ifWithProof False _ ifFalse = ifFalse Refl
 
--- For some proposition p, and assuming testing equal means being equal,
--- and for some element el1, if p holds for el1, then p holds for all elements
--- in a list containing only el1.
-trueForAllListElems1 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> p el1
- -> (v : k) -> (elem v [el1] = True) -> p v
-trueForAllListElems1 p prfEq el1 fact1 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      absurd (replace {P = \x => (if x then True else False) = True} prfEqFalse prfElem)
-    )
+-- Eliminate an inconsequential head element from a list in a foldl
+public export
+foldlEliminate1 : {xs : List a}
+  -> f init x = init
+  -> foldl f init (x::xs) = result
+  -> foldl f init xs = result
+foldlEliminate1 prfEq prf =
+  trans (cong (\x => foldl f x xs) (sym prfEq)) prf
 
--- The same, if you also prove p holds for el2, and the list has only el1 and el2.
-trueForAllListElems2 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k)
- -> p el1 -> p el2
- -> (v : k) -> (elem v [el1, el2] = True) -> p v
-trueForAllListElems2 p prfEq el1 el2 fact1 fact2 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems1 p prfEq el2 fact2 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
+-- If the element is in the list, but not in the head, it's in the tail
+public export
+elemInTail : Eq a =>
+     {v, x : a}
+  -> {xs : List a}
+  -> v == x = False
+  -> elem v (x :: xs) = True
+  -> elem v xs = True
+elemInTail prfNotEq prfElem =
+  foldlEliminate1 {x} {xs} {init = False} prfNotEq prfElem
 
-trueForAllListElems3 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k)
- -> p el1 -> p el2 -> p el3
- -> (v : k) -> (elem v [el1, el2, el3] = True) -> p v
-trueForAllListElems3 p prfEq el1 el2 el3 fact1 fact2 fact3 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems2 p prfEq el2 el3 fact2 fact3 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
+-- If we have a list with proofs, we can produce a proof for any single element in the list
+public export
+trueForAllListElems : Eq k =>
+     {p : k -> Type}
+  -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
+  -> (xs : List (DPair k p))
+  -> (v : k)
+  -> elem v (map DPair.fst xs) = True
+  -> p v
+trueForAllListElems prfEq [] v prfElem = absurd prfElem
+trueForAllListElems prfEq ((x ** p)::xs) v prfElem = ifWithProof (v == x)
+  (\prfEqTrue =>
+    rewrite prfEq v x prfEqTrue in p
+  )
+  (\prfEqFalse =>
+    trueForAllListElems prfEq xs v (elemInTail prfEqFalse prfElem)
+  )
 
-trueForAllListElems4 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k) -> (el4 : k)
- -> p el1 -> p el2 -> p el3 -> p el4
- -> (v : k) -> (elem v [el1, el2, el3, el4] = True) -> p v
-trueForAllListElems4 p prfEq el1 el2 el3 el4 fact1 fact2 fact3 fact4 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems3 p prfEq el2 el3 el4 fact2 fact3 fact4 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                              if v == el4 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
-
-trueForAllListElems5 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k) -> (el4 : k) -> (el5 : k)
- -> p el1 -> p el2 -> p el3 -> p el4 -> p el5
- -> (v : k) -> (elem v [el1, el2, el3, el4, el5] = True) -> p v
-trueForAllListElems5 p prfEq el1 el2 el3 el4 el5 fact1 fact2 fact3 fact4 fact5 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems4 p prfEq el2 el3 el4 el5 fact2 fact3 fact4 fact5 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                              if v == el4 then True else
-                              if v == el5 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
-
-trueForAllListElems6 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k) -> (el4 : k) -> (el5 : k) -> (el6 : k)
- -> p el1 -> p el2 -> p el3 -> p el4 -> p el5 -> p el6
- -> (v : k) -> (elem v [el1, el2, el3, el4, el5, el6] = True) -> p v
-trueForAllListElems6 p prfEq el1 el2 el3 el4 el5 el6 fact1 fact2 fact3 fact4 fact5 fact6 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems5 p prfEq el2 el3 el4 el5 el6 fact2 fact3 fact4 fact5 fact6 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                              if v == el4 then True else
-                              if v == el5 then True else
-                              if v == el6 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
-
-trueForAllListElems7 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k) -> (el4 : k) -> (el5 : k) -> (el6 : k)
- -> (el7 : k)
- -> p el1 -> p el2 -> p el3 -> p el4 -> p el5 -> p el6 -> p el7
- -> (v : k) -> (elem v [el1, el2, el3, el4, el5, el6, el7] = True) -> p v
-trueForAllListElems7 p prfEq el1 el2 el3 el4 el5 el6 el7 fact1 fact2 fact3 fact4 fact5 fact6 fact7 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems6 p prfEq el2 el3 el4 el5 el6 el7 fact2 fact3 fact4 fact5 fact6 fact7 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                              if v == el4 then True else
-                              if v == el5 then True else
-                              if v == el6 then True else
-                              if v == el7 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
-
-trueForAllListElems8 : Eq k =>
-    (p : k -> Type)
- -> (prfEq : (v1 : k) -> (v2 : k) -> (v1 == v2 = True) -> v1 = v2)
- -> (el1 : k) -> (el2 : k) -> (el3 : k) -> (el4 : k) -> (el5 : k) -> (el6 : k)
- -> (el7 : k) -> (el8 : k)
- -> p el1 -> p el2 -> p el3 -> p el4 -> p el5 -> p el6 -> p el7 -> p el8
- -> (v : k) -> (elem v [el1, el2, el3, el4, el5, el6, el7, el8] = True) -> p v
-trueForAllListElems8 p prfEq el1 el2 el3 el4 el5 el6 el7 el8 fact1 fact2 fact3 fact4 fact5 fact6 fact7 fact8 v prfElem =
-  ifWithProof (v == el1)
-    (\prfEqTrue : (v == el1 = True) =>
-        (rewrite (prfEq v el1 prfEqTrue) in fact1)
-    )
-    (\prfEqFalse : (v == el1 = False) =>
-      trueForAllListElems7 p prfEq el2 el3 el4 el5 el6 el7 el8 fact2 fact3 fact4 fact5 fact6 fact7 fact8 v (
-        replace {P = \x => (if x then True else
-                              if v == el2 then True else
-                              if v == el3 then True else
-                              if v == el4 then True else
-                              if v == el5 then True else
-                              if v == el6 then True else
-                              if v == el7 then True else
-                              if v == el8 then True else
-                                False) = True} prfEqFalse prfElem
-      )
-    )
-
-
-notNonMineImpliesMine : Not (MineFact c IsNotMine) -> MineFact c IsMine
+public export
+notNonMineImpliesMine : {c : Coord} -> Not (MineFact c IsNotMine) -> MineFact c IsMine
 notNonMineImpliesMine {c} prfNotNonMine = case mineOrNot c of
   Left prfCIsMine => prfCIsMine
   Right prfNonMine => absurd (prfNotNonMine prfNonMine)
 
+public export
 mineImpliesNotNonMine : MineFact c IsMine -> Not (MineFact c IsNotMine)
-mineImpliesNotNonMine {c} prfMine prfNonMine = nonMineImpliesNotMine prfNonMine prfMine
+mineImpliesNotNonMine prfMine prfNonMine = nonMineImpliesNotMine prfNonMine prfMine

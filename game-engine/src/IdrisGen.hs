@@ -24,15 +24,17 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \\n\
   \import ProofSweeperBase\n\
   \\n\
-  \%access public export\n\
   \%default total\n\
   \\n\
+  \public export\n\
   \gridSize : Nat\n\
   \gridSize = " ++ show gridSize ++ "\n\
   \\n\
+  \public export\n\
   \mineNeighboursForSize : Coord -> List Coord\n\
   \mineNeighboursForSize = mineNeighbours gridSize\n\
   \\n\
+  \public export\n\
   \data MineFact : Coord -> MineProp -> Type where\n\
   \  KnownNotMineIsNotMine : MineFact c (KnownNotMine _) -> MineFact c IsNotMine\n\
   \  AllMinesAccountedFor :\n\
@@ -64,18 +66,20 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
   \           -> elem cNeigh (mineNeighboursForSize c) = True)\n\
   \    -> (prfNonMineIsNeighbour : elem cMine (mineNeighboursForSize c) = True)\n\
   \    -> (prfMineNotInKnownNonMines : elem cMine knownNonMines = False)\n\
-  \    -> MineFact cMine IsMine\n\
-  \  NotMineImpliesNonMine :\n\
-  \       Not (MineFact c IsMine)\n\
-  \    -> MineFact c IsNotMine\n"
+  \    -> MineFact cMine IsMine\n"
     ++ genMineFacts counts status ++ "\n\
   \\n\
+  \public export\n\
+  \mineOrNot : (c : Coord) -> Either (MineFact c IsMine) (MineFact c IsNotMine)\n\
+  \mineOrNot v = believe_me v\n\
+  \\n\
+  \public export\n\
   \nonMineImpliesNotMine : MineFact c IsNotMine -> Not (MineFact c IsMine)\n\
   \nonMineImpliesNotMine v = believe_me v\n\
-  \mineOrNot :\n\
-  \       (c : Coord)\n\
-  \    -> Either (MineFact c IsMine) (MineFact c IsNotMine)\n\
-  \mineOrNot v = believe_me v\n"
+  \\n\
+  \public export\n\
+  \notMineImpliesNonMine : {c : Coord} -> Not (MineFact c IsMine) -> MineFact c IsNotMine\n\
+  \notMineImpliesNonMine v = either (absurd . v) id (mineOrNot c)\n"
   
 saveIdrisGame :: Game -> M.Map Coord Int -> IO ()
 saveIdrisGame g facts = do

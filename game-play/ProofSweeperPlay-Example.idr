@@ -2,8 +2,7 @@ module ProofSweeperPlay
 import ProofSweeperKnown
 import ProofSweeperBase
 import ProofSweeperLemmas
-
-%access public export
+import Data.List
 
 mineAt_14_9 : MineFact (MkCoord 14 9) IsMine
 mineAt_14_9 =
@@ -23,21 +22,23 @@ mineAt_14_9 =
     Refl
     -- prfKnownNonMinesAreNotMines - We need to prove that each of the 4 are
     -- not actually mines...
-    (trueForAllListElems4
-      (\x => MineFact x IsNotMine) eqTestIsEqCoord
-      (MkCoord 13 9) (MkCoord 13 10)
-      (MkCoord 13 11) (MkCoord 14 11)
-      (KnownNotMineIsNotMine NoMineAt13_9)
-      (KnownNotMineIsNotMine NoMineAt13_10)
-      (KnownNotMineIsNotMine NoMineAt13_11)
-      (KnownNotMineIsNotMine NoMineAt14_11)
+    (trueForAllListElems eqTestIsEqCoord
+      [
+        (MkCoord 13 9 ** KnownNotMineIsNotMine NoMineAt13_9),
+        (MkCoord 13 10 ** KnownNotMineIsNotMine NoMineAt13_10),
+        (MkCoord 13 11 ** KnownNotMineIsNotMine NoMineAt13_11),
+        (MkCoord 14 11 ** KnownNotMineIsNotMine NoMineAt14_11)
+      ]
     )
     -- prfKnownNonMinesAreNeighbours - We need to break out into individual
     --  proofs, and then Idris can simplify from Refl
-    (trueForAllListElems4
-      (\x => elem x (mineNeighboursForSize (MkCoord 14 10)) = True) eqTestIsEqCoord
-      (MkCoord 13 9) (MkCoord 13 10) (MkCoord 13 11) (MkCoord 14 11)
-      Refl Refl Refl Refl
+    (trueForAllListElems eqTestIsEqCoord
+      [
+        (MkCoord 13 9 ** Refl),
+        (MkCoord 13 10 ** Refl),
+        (MkCoord 13 11 ** Refl),
+        (MkCoord 14 11 ** Refl)
+      ]
     )
     -- prfNonMineIsNeighbour - that 14,9 neighbours 14,10 follows automatically by
     --   simplification to Refl
@@ -67,38 +68,40 @@ YCoord : Coord
 YCoord = MkCoord 13 13
 ZCoord : Coord
 ZCoord = MkCoord 14 13
+AboveYCoord : Coord
+AboveYCoord = MkCoord 13 12
+AboveZCoord : Coord
+AboveZCoord = MkCoord 14 12
+TwoAboveYCoord : Coord
+TwoAboveYCoord = MkCoord 13 11
+TwoAboveZCoord : Coord
+TwoAboveZCoord = MkCoord 14 11
 
 contradictionXMine : MineFact XCoord IsMine -> Void
 contradictionXMine hXMine =
   let
-    aboveYCoord : Coord = MkCoord 13 12
-    aboveZCoord : Coord = MkCoord 14 12
-    twoAboveYCoord : Coord = MkCoord 13 11
-    twoAboveZCoord : Coord = MkCoord 14 11
     yIsNotMine : MineFact YCoord IsNotMine =
       AllMinesAccountedFor
-        aboveYCoord YCoord NoMineAt13_12 [XCoord] Refl
+        AboveYCoord YCoord NoMineAt13_12 [XCoord] Refl
         -- We need to show that XCoord is a mine...
-        (trueForAllListElems1 (\x => MineFact x IsMine) eqTestIsEqCoord
-           XCoord hXMine)
+        (trueForAllListElems eqTestIsEqCoord
+           [(XCoord ** hXMine)])
         -- We need to show that XCoord is a neighbour of aboveYCoord...
-        (trueForAllListElems1 (\x => elem x (mineNeighboursForSize aboveYCoord) = True)
-           eqTestIsEqCoord
-           XCoord Refl)
+        (trueForAllListElems eqTestIsEqCoord
+           [(XCoord ** Refl)])
         -- And that YCoord is also a neighbour...
         Refl
         -- And that YCoord is not in [XCoord]
         Refl
     zIsNotMine : MineFact ZCoord IsNotMine =
       AllMinesAccountedFor
-        aboveYCoord ZCoord NoMineAt13_12 [XCoord] Refl
+        AboveYCoord ZCoord NoMineAt13_12 [XCoord] Refl
         -- We need to show that XCoord is a mine...
-        (trueForAllListElems1 (\x => MineFact x IsMine) eqTestIsEqCoord
-           XCoord hXMine)
+        (trueForAllListElems eqTestIsEqCoord
+           [(XCoord ** hXMine)])
         -- We need to show that XCoord is a neighbour of aboveYCoord...
-        (trueForAllListElems1 (\x => elem x (mineNeighboursForSize aboveYCoord) = True)
-           eqTestIsEqCoord
-           XCoord Refl)
+        (trueForAllListElems eqTestIsEqCoord
+           [(XCoord ** Refl)])
         -- And that ZCoord is also a neighbour...
         Refl
         -- And that ZCoord is not in [XCoord]
@@ -106,21 +109,20 @@ contradictionXMine hXMine =
     -- Now we construct a contradictory fact resulting from yIsNotMine...
     zIsMine : MineFact ZCoord IsMine =
       AllNonMinesAccountedFor
-        aboveZCoord ZCoord NoMineAt14_12
-        [twoAboveYCoord, twoAboveZCoord, aboveYCoord, YCoord] Refl
+        AboveZCoord ZCoord NoMineAt14_12
+        [TwoAboveYCoord, TwoAboveZCoord, AboveYCoord, YCoord] Refl
         -- Each of the surrounding Coords are not mines...
-        (trueForAllListElems4 (\x => MineFact x IsNotMine) eqTestIsEqCoord
-          twoAboveYCoord twoAboveZCoord aboveYCoord YCoord
-          (KnownNotMineIsNotMine NoMineAt13_11)
-          (KnownNotMineIsNotMine NoMineAt14_11)
-          (KnownNotMineIsNotMine NoMineAt13_12)
-          yIsNotMine)
+        (trueForAllListElems eqTestIsEqCoord
+          [ (TwoAboveYCoord ** KnownNotMineIsNotMine NoMineAt13_11),
+            (TwoAboveZCoord ** KnownNotMineIsNotMine NoMineAt14_11),
+            (AboveYCoord ** KnownNotMineIsNotMine NoMineAt13_12),
+            (YCoord ** yIsNotMine)])
         -- Surrounding Coords are neighbours of aboveZCoord
-        (trueForAllListElems4 (\x => elem x (mineNeighboursForSize aboveZCoord) = True)
-          eqTestIsEqCoord
-          twoAboveYCoord twoAboveZCoord aboveYCoord YCoord
-          Refl           Refl           Refl        Refl
-        )
+        (trueForAllListElems eqTestIsEqCoord
+          [ (TwoAboveYCoord ** Refl),
+            (TwoAboveZCoord ** Refl),
+            (AboveYCoord ** Refl),
+            (YCoord ** Refl)])
         -- And that ZCoord is also a neighbour...
         Refl
         -- And that ZCoord is not in [twoAboveYCoord, twoAboveZCoord, aboveYCoord, YCoord]
