@@ -17,7 +17,7 @@ is valid, and updating everything for the new state.
 
 # Getting started
 
-* Before you can use ProofSweeper, you need to have Idris installed and on the PATH. ProofSweeper has been tested with Idris-1.1.1, but may work with other versions of Idris. Follow the [Idris installation instructions](https://github.com/idris-lang/Idris-dev/wiki/Installation-Instructions), and check that invoking `idris` from the command line works before continuing.
+* Before you can use ProofSweeper, you need to have Idris 2 installed and on the PATH. ProofSweeper has been tested with Idris2-0.7.0, but may work with other versions of Idris 2. Follow the [Idris 2 installation instructions](https://github.com/idris-lang/Idris2/blob/main/INSTALL.md), and check that invoking `idris2` from the command line works before continuing.
 * You also need Haskell Stack installed. Refer to the [Stack installation instructions](https://docs.haskellstack.org/en/stable/README/) to install Stack. Check that you can run `stack` on the command-line before continuing.
 * If you haven't already, clone this ProofSweeper repository with `git clone https://github.com/A1kmm/proofsweeper.git`, and change into the proofsweeper directory.
 * Change into the game-engine subdirectory, and run `stack install`. Check that you can run `ProofSweeperEngine` from the command-line.
@@ -148,8 +148,8 @@ operations rely on comparison, and the axioms use lists, this is a very useful l
 ifWithProof lets you handle the true and false case, and passes in a proof that it
 is in fact true or false to each branch.
 
-trueForAllListElems1 through to trueForAllListElems8 let you deal with statements
-of the form: for all v, given that v is in some list, then some proposition p holds for all v. You need to know the length of the list (1 through to 8), and supply the elements of the list, plus a proof for each element of the list. You also need to supply the proposition p, and the proof that an equality comparison returning true means the elements are equal. This is most usefully used with lists of Coords - in which case you can use eqTestIsEqCoord to provide the proof that true equality comparison means equality.
+trueForAllListElems lets you deal with statements
+of the form: for all v, given that v is in some list, then some proposition p holds for all v. You need to supply the elements of the list, plus a proof for each element of the list. You also need to supply the proposition p, and the proof that an equality comparison returning true means the elements are equal. This is most usefully used with lists of Coords - in which case you can use eqTestIsEqCoord to provide the proof that true equality comparison means equality.
 
 ## A simple example proof
 
