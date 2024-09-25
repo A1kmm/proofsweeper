@@ -70,16 +70,16 @@ gameToIdris (Game { gameGridSize = gridSize, gameStatus = status }) counts =
     ++ genMineFacts counts status ++ "\n\
   \\n\
   \public export\n\
+  \mineOrNot : (c : Coord) -> Either (MineFact c IsMine) (MineFact c IsNotMine)\n\
+  \mineOrNot v = believe_me v\n\
+  \\n\
+  \public export\n\
   \nonMineImpliesNotMine : MineFact c IsNotMine -> Not (MineFact c IsMine)\n\
   \nonMineImpliesNotMine v = believe_me v\n\
   \\n\
   \public export\n\
-  \notMineImpliesNonMine : Not (MineFact c IsMine) -> MineFact c IsNotMine\n\
-  \notMineImpliesNonMine v = believe_me v\n\
-  \\n\
-  \public export\n\
-  \mineOrNot : (c : Coord) -> Either (MineFact c IsMine) (MineFact c IsNotMine)\n\
-  \mineOrNot v = believe_me v\n"
+  \notMineImpliesNonMine : {c : Coord} -> Not (MineFact c IsMine) -> MineFact c IsNotMine\n\
+  \notMineImpliesNonMine v = either (absurd . v) id (mineOrNot c)\n"
   
 saveIdrisGame :: Game -> M.Map Coord Int -> IO ()
 saveIdrisGame g facts = do
